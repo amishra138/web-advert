@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace WebAdvert.Views.Accounts
+namespace WebAdvert.Models.Accounts
 {
     public class SignUpModel
     {
