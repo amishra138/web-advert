@@ -98,7 +98,85 @@ namespace WebAdvert.Controllers
                     throw ex;
                 }
             }
+            return View("Confirm", model);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Login(LoginModel model)
+        {
             return View(model);
+        }
+
+        [ActionName("Login")]
+        [HttpPost]
+        public async Task<IActionResult> Login_post(LoginModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var loggedInUser = await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, false);
+
+                if (loggedInUser.Succeeded)
+                {
+                    return RedirectToAction("Index", "Home");
+                }
+                else
+                {
+                    ModelState.AddModelError("LoginError", "Email and password do not match");
+                }
+            }
+            return View("Login", model);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ForgotPassword(ForgotPassword model)
+        {
+            return View(model);
+        }
+
+        [ActionName("ForgotPassword")]
+        [HttpPost]
+        public async Task<IActionResult> ForgotPasswordPost(ForgotPassword model)
+        {
+            if (ModelState.IsValid)
+            {
+                var user = await _userManager.FindByEmailAsync(model.Email);
+
+                if (user == null)
+                {
+                    ModelState.AddModelError("NotFound", "User with given email was not found");
+                    return View("ForgotPassword", model);
+                }
+                await user.ForgotPasswordAsync();
+                return RedirectToAction("ResetPassword");
+            }
+            return View("ForgotPassword", model);
+        }
+
+
+        [HttpGet]
+        public async Task<IActionResult> ResetPassword(ResetPassword model)
+        {
+            return View(model);
+        }
+
+        [ActionName("ResetPassword")]
+        [HttpPost]
+        public async Task<IActionResult> ResetPasswordPost(ResetPassword model)
+        {
+            if (ModelState.IsValid)
+            {
+                var user = await _userManager.FindByEmailAsync(model.Email);
+
+                if (user == null)
+                {
+                    ModelState.AddModelError("NotFound", "User with given email was not found");
+                    return View("ForgotPassword", model);
+                }
+                var result = user.ConfirmForgotPasswordAsync(model.Code, model.Password);
+
+                return View("Home", "Index");
+            }
+            return View("ResetPassword", model);
         }
     }
 }
